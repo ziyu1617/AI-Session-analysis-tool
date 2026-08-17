@@ -1,81 +1,83 @@
 # AI Session Analysis Tool
 
-一个基于大模型的用户会话行为分析工具。上传埋点数据（CSV / Excel），自动按会话切分用户行为路径，并调用大模型生成会话概况、深度洞察与下单商品识别。
+An LLM-powered tool for analyzing user session behavior. Upload tracking data (CSV / Excel), and the tool automatically groups events into sessions, reconstructs each user's behavior path, and uses a large language model to generate session summaries, deep insights, and order-product identification.
 
-## 功能
+## Features
 
-- **数据上传** —— 支持 CSV、Excel（.xlsx / .xls），按 `session_id` 自动切分会话
-- **会话分析** —— 页面访问、行为类型、曝光时长等维度统计
-- **AI 分析** —— 三种独立的分析视角，各自使用不同的提示词：
-  - 会话概况：还原用户决策旅程与页面停留时长
-  - 深度洞察：产品视角的 markdown 分析报告
-  - 商品识别：依据行为字段判定下单状态与对应商品
+- **Data upload** — Accepts CSV and Excel (`.xlsx` / `.xls`), grouping events into sessions by `session_id`
+- **Session analytics** — Page visits, action-type breakdowns, and page exposure duration
+- **AI analysis** — Three independent perspectives, each driven by its own prompt:
+  - **Session summary** — Reconstructs the user's decision journey with page dwell times
+  - **Deep insights** — A product-oriented analysis report in markdown
+  - **Order products** — Determines checkout status and the corresponding products from behavior fields
 
-## 环境要求
+## Requirements
 
-- Node.js ≥ 18（项目使用 Vite 5，不支持 Node 16 及以下）
+- Node.js ≥ 18 (this project uses Vite 5, which does not support Node 16 or earlier)
 
-## 快速开始
+## Getting Started
 
-### 1. 安装依赖
+### 1. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 2. 配置大模型密钥
+### 2. Configure your model API key
 
-在项目根目录创建 `.env.local`：
+Create a `.env.local` file in the project root:
 
 ```
-DEEPSEEK_API_KEY=你的密钥
+DEEPSEEK_API_KEY=your-api-key
 DEEPSEEK_BASE_URL=https://api.deepseek.com
 DEEPSEEK_MODEL=deepseek-v4-flash
 ```
 
-该文件已在 `.gitignore` 中，不会被提交。密钥只在本地后端进程中使用，**不会进入前端构建产物**。
+This file is listed in `.gitignore` and will not be committed. The key is used only by the local backend process and **never reaches the frontend bundle**.
 
-### 3. 启动
+### 3. Start the app
 
 ```bash
 npm run dev
 ```
 
-会同时启动：
+This starts both:
 
-- 后端 `http://127.0.0.1:3001` —— 持有密钥，代理大模型请求
-- 前端 `http://localhost:8080`
+- Backend at `http://127.0.0.1:3001` — holds the API key and proxies model requests
+- Frontend at `http://localhost:8080`
 
-### 其他命令
+### Other commands
 
 ```bash
-npm test     # 运行单元测试
-npm run build # 构建前端产物
+npm test       # Run unit tests
+npm run build  # Build the frontend
 ```
 
-## 数据格式
+## Data Format
 
-| 字段 | 说明 |
+| Field | Description |
 | --- | --- |
-| `session_id` | **必需**，会话标识 |
-| `fmt_time2` | **必需**，事件时间 |
-| `page_name` | 页面名称 |
-| `event_name` | 事件名称 |
-| `action_type_name` | 行为类型，用于判定曝光 / 点击 / 加购 / 下单 |
-| `sequence` | 事件序号，用于去重 |
+| `session_id` | **Required.** Session identifier |
+| `fmt_time2` | **Required.** Event timestamp |
+| `page_name` | Page name |
+| `event_name` | Event name |
+| `action_type_name` | Action type — used to classify exposure / click / add-to-cart / order |
+| `sequence` | Event sequence number, used for deduplication |
 
-## 项目结构
+## Project Structure
 
 ```
-server/          本地后端，持有密钥并转发大模型请求
-src/analysis/    会话分析模块（提示词、序列化、后处理）
-src/components/  React 组件
-src/utils/       通用计算逻辑
+server/          Local backend; holds the API key and forwards model requests
+src/analysis/    Session analysis module (prompts, serialization, post-processing)
+src/components/  React components
+src/utils/       Shared computation logic
 ```
 
-## 架构说明
+## Architecture
 
-密钥只存在于后端进程。前端通过 `/api/ai/complete` 调用，不感知模型厂商，浏览器中不存在任何密钥。若要更换模型提供方，只需修改 `server/deepseek.js`。
+The API key lives only in the backend process. The frontend calls `/api/ai/complete` and has no knowledge of the model provider — no credentials exist in the browser. To switch providers, edit `server/deepseek.js` only.
+
+The three analyses are deliberately kept separate. Each has its own prompt, its own session serialization, and its own post-processing, because each is meant to produce a different kind of result. Adjusting one has no effect on the other two — see `src/analysis/kinds/`.
 
 ## License
 
