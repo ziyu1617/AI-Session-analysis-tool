@@ -23,19 +23,7 @@ An LLM-powered tool for analyzing user session behavior. Upload tracking data (C
 npm install
 ```
 
-### 2. Configure your model API key
-
-Create a `.env.local` file in the project root:
-
-```
-DEEPSEEK_API_KEY=your-api-key
-DEEPSEEK_BASE_URL=https://api.deepseek.com
-DEEPSEEK_MODEL=deepseek-v4-flash
-```
-
-This file is listed in `.gitignore` and will not be committed. The key is used only by the local backend process and **never reaches the frontend bundle**.
-
-### 3. Start the app
+### 2. Start the app
 
 ```bash
 npm run dev
